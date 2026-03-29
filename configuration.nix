@@ -51,8 +51,20 @@
     enable32Bit = true;
   };
 
+  # VM guest graphics for the current VMware install.
+  # On the future bare-metal RTX 5080 machine:
+  # 1. Delete the two VMware lines below.
+  # 2. Uncomment the NVIDIA block below them.
+  # 3. Regenerate hardware-configuration.nix on that machine.
   services.xserver.videoDrivers = [ "vmware" ];
   virtualisation.vmware.guest.enable = true;
+
+  # services.xserver.videoDrivers = [ "nvidia" ];
+  # hardware.nvidia = {
+  #   modesetting.enable = true;
+  #   open = true;
+  #   nvidiaSettings = true;
+  # };
 
   programs.niri.enable = true;
   programs.steam.enable = true;
