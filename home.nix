@@ -350,7 +350,7 @@
     window-padding-x = 15
     window-padding-y = 15
     mouse-scroll-multiplier = 3
-    shell-integration = none
+    shell-integration = detect
   '';
 
   # Hide unwanted apps from rofi
