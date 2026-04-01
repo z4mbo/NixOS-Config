@@ -48,6 +48,18 @@
     };
   };
 
+  programs.vicinae = {
+    enable = true;
+    systemd.enable = true;
+    settings = {
+      font.size = 18;
+      window = {
+        opacity = 0.95;
+        rounding = 8;
+      };
+    };
+  };
+
   # Zsh with Powerlevel10k
   programs.zsh = {
     enable = true;
@@ -178,7 +190,7 @@
 
     binds {
         Mod+Return { spawn "ghostty"; }
-        Mod+Space { spawn "rofi" "-show" "drun" "-show-icons"; }
+        Mod+Space { spawn "vicinae" "open"; }
         Mod+E { spawn "nautilus"; }
         Mod+Q { close-window; }
         Mod+W { toggle-window-floating; }
@@ -250,93 +262,6 @@
     screenshot-path "~/Pictures/Screenshots/screenshot-%Y-%m-%d-%H-%M-%S.png"
   '';
 
-  home.file.".config/rofi/config.rasi".text = ''
-    @theme "/dev/null"
-
-    configuration {
-        modi: "drun,run";
-        show-icons: true;
-        icon-theme: "Adwaita";
-        font: "JetBrainsMono Nerd Font 18";
-        drun-display-format: "{name}";
-        drun-match-fields: "name,generic,keywords";
-    }
-
-    * {
-        bg: #000000;
-        bg-alt: #1a1a1a;
-        fg: #ffffff;
-        accent: #5277C3;
-    }
-
-    window {
-        width: 600px;
-        background-color: @bg;
-        border: 2px;
-        border-color: @accent;
-                  border-radius: 8px;
-        padding: 20px;
-    }
-
-    mainbox {
-        background-color: @bg;
-        spacing: 10px;
-    }
-
-    inputbar {
-        background-color: @bg-alt;
-        border-radius: 8px;
-        padding: 12px;
-        children: [prompt, entry];
-    }
-
-    prompt {
-        background-color: @bg-alt;
-        text-color: @accent;
-        padding: 0 10px 0 0;
-    }
-
-    entry {
-        background-color: @bg-alt;
-        text-color: @fg;
-        placeholder: "Search...";
-        placeholder-color: #666666;
-    }
-
-    listview {
-        background-color: @bg;
-        lines: 8;
-        spacing: 5px;
-        fixed-height: false;
-    }
-
-    element {
-        background-color: @bg;
-        padding: 10px;
-        border-radius: 8px;
-    }
-
-    element selected {
-        background-color: @accent;
-    }
-
-    element-icon {
-        size: 24px;
-        margin: 0 10px 0 0;
-        background-color: inherit;
-    }
-
-    element-text {
-        text-color: @fg;
-        vertical-align: 0.5;
-        background-color: inherit;
-    }
-
-    element selected element-text {
-        text-color: @bg;
-    }
-  '';
-
   home.file.".config/ghostty/config".text = ''
     font-family = JetBrainsMono Nerd Font
     font-size = 18
@@ -353,7 +278,7 @@
     shell-integration = detect
   '';
 
-  # Hide unwanted apps from rofi
+  # Hide unwanted apps from launchers
   home.file.".local/share/applications/com.google.Chrome.desktop".text = ''
     [Desktop Entry]
     Name=Google Chrome
@@ -387,18 +312,6 @@
   home.file.".local/share/applications/gvim.desktop".text = ''
     [Desktop Entry]
     Name=GVim
-    Type=Application
-    NoDisplay=true
-  '';
-  home.file.".local/share/applications/rofi.desktop".text = ''
-    [Desktop Entry]
-    Name=Rofi
-    Type=Application
-    NoDisplay=true
-  '';
-  home.file.".local/share/applications/rofi-theme-selector.desktop".text = ''
-    [Desktop Entry]
-    Name=Rofi Theme Selector
     Type=Application
     NoDisplay=true
   '';
@@ -611,7 +524,7 @@
     text = ''
       #!/bin/sh
       entries="Logout\nReboot\nShutdown"
-      selected=$(printf '%s\n' "$entries" | rofi -dmenu -p "Power Menu" -theme-str 'window {width: 300px;} listview {lines: 3;}')
+      selected=$(printf '%s\n' "$entries" | vicinae dmenu -p "Power Menu")
       case $selected in
         Logout) niri msg action quit;;
         Reboot) reboot;;
@@ -657,7 +570,7 @@
     ╠══════════════════════════════════════════════════════════════╣
     ║  WINDOWS                                                     ║
     ║    Super + Return      Open terminal                         ║
-    ║    Super + Space       App launcher (rofi)                   ║
+    ║    Super + Space       App launcher (vicinae)                ║
     ║    Super + E           File manager                          ║
     ║    Super + Q           Close window                          ║
     ║    Super + F           Full width (maximize column)           ║

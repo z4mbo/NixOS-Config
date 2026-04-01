@@ -207,7 +207,7 @@
     quickshell
     brightnessctl
     imagemagick
-    rofi
+    vicinae
     nautilus
     swaynotificationcenter
 
