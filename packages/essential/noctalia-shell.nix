@@ -166,20 +166,25 @@ let
       "$(tick "$theme" light)  Theme: Light" \
       "$(tick "$windows" solid)  Windows: Solid" \
       "$(tick "$windows" transparent)  Windows: Transparent + blur" \
-      "$(tick "$windows" inactive)  Windows: Inactive transparent + blur" \
+      "$(tick "$windows" inactive)  Windows: Inactive transparent" \
       | noctalia dmenu -p "Theme")
 
     ghostty="$HOME/.config/ghostty/appearance"
 
-    # Glass: niri blurs the wallpaper behind windows; border must not paint a
-    # solid rectangle behind them. Ghostty does its own see-through background
-    # (text stays crisp); other apps use niri's window opacity.
+    # Transparent = frosted glass (niri blurs the wallpaper behind windows;
+    # Ghostty does its own see-through background so text stays crisp, other
+    # apps use niri's window opacity). Inactive = unfocused windows just get
+    # less opaque, no blur.
     glass() {
       printf '// mode: %s\n' "$1"
-      printf 'window-rule {\n    draw-border-with-background false\n    background-effect {\n        blur true\n    }\n}\n'
+      # The border must not paint a solid rectangle behind see-through windows.
+      printf 'window-rule {\n    draw-border-with-background false\n}\n'
       if [ "$1" = transparent ]; then
+        # Frosted glass: blurred wallpaper behind every window.
+        printf 'window-rule {\n    background-effect {\n        blur true\n    }\n}\n'
         printf 'window-rule {\n    exclude app-id="^com.mitchellh.ghostty$"\n    opacity 0.85\n}\n'
       else
+        # Inactive windows: just less opaque, no blur.
         printf 'window-rule {\n    match is-focused=false\n    opacity 0.75\n}\n'
       fi
     }
