@@ -53,6 +53,9 @@
     }
 
     input {
+        // Super+H/J/K/L (and any focus change) moves the pointer to the
+        // center of the newly focused window.
+        warp-mouse-to-focus mode="center-xy"
         keyboard {
             xkb {
                 layout "it"
@@ -100,16 +103,6 @@
     window-rule {
         geometry-corner-radius 14
         clip-to-geometry true
-    }
-
-    // Inactive windows: slightly see-through with the background blurred
-    // behind them; the focused window stays fully opaque.
-    window-rule {
-        match is-focused=false
-        opacity 0.85
-        background-effect {
-            blur true
-        }
     }
 
     // Noctalia settings window floats.
