@@ -63,6 +63,8 @@ let
     position = "top"
     radius = 12
     thickness = 40
+    border = "#3a3a3a"             # same hairline as niri window borders
+    border_width = 1.0
     scale = 1.15
     padding = 16
     widget_spacing = 10
@@ -119,9 +121,12 @@ let
 
     [notification]
     position = "top_right"
+    border_color = "#3a3a3a"
+    border_width = 1
 
     [osd]
     position = "top_right"
+    border_color = "#3a3a3a"
   '';
 
   # Copies GUI settings into the repo whenever Noctalia saves them.

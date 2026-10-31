@@ -26,6 +26,12 @@ in
     helix
   ];
 
+  # Helix is the default terminal editor (git, tv, sudoedit, ...).
+  environment.variables = {
+    EDITOR = "hx";
+    VISUAL = "hx";
+  };
+
   systemd.tmpfiles.rules = [
     "d /home/z4mbo/.config/helix 0755 z4mbo users -"
     "L+ /home/z4mbo/.config/helix/config.toml - - - - ${config}"

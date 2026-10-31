@@ -52,9 +52,33 @@ let
         xdg-user-dirs
         which
         python3
+        # Chromium Embedded Framework (web browser/Fab panels) + GTK dialogs
+        stdenv.cc.cc.lib
+        atk
+        at-spi2-atk
+        at-spi2-core
+        cairo
+        pango
+        gdk-pixbuf
+        cups
+        libdrm
+        libgbm
+        libxcb
+        libxcomposite
+        libxdamage
+        libxtst
+        libxshmfence
+        libxkbfile
+        libuuid
+        libsecret
+        mono
+        dotnet-sdk_8
+        xdg-utils
       ];
     runScript = pkgs.writeShellScript "unreal-engine-run" ''
       export LD_LIBRARY_PATH=/run/opengl-driver/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+      export __EGL_VENDOR_LIBRARY_DIRS=/run/opengl-driver/share/glvnd/egl_vendor.d
+      export VK_ICD_FILENAMES=$(ls /run/opengl-driver/share/vulkan/icd.d/nvidia_icd*.json 2>/dev/null | head -n1)
       exec "${ueRoot}/Engine/Binaries/Linux/UnrealEditor" "$@"
     '';
   };
