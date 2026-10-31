@@ -1,6 +1,7 @@
 { pkgs, ... }:
 
-# tmux styled like the terminal/prompt: Monochrome greys, rounded "pills",
+# tmux styled like the terminal/prompt (ANSI colors, so it follows the
+# terminal light/dark theme), rounded "pills",
 # status bar on top. Prefix is Ctrl+Space; mouse on; windows start at 1.
 #   prefix |  split right      prefix -  split down
 #   prefix h/j/k/l  move between panes   prefix r  reload config
@@ -35,22 +36,22 @@
       set -g status-position top
       set -g status-interval 5
       set -g status-justify left
-      set -g status-style "bg=default,fg=#8a8a8a"
+      set -g status-style "bg=default,fg=colour8"
       set -g status-left-length 60
       set -g status-right-length 60
-      set -g status-left "#[fg=#1a1a1a]#[bg=#1a1a1a,fg=#ffffff]   #S #[bg=default,fg=#1a1a1a]  "
-      set -g status-right "#[fg=#5a5a5a]󰉋  #{b:pane_current_path}   %H:%M "
-      set -g window-status-format "#[fg=#5a5a5a] #I #W "
-      set -g window-status-current-format "#[fg=#242424]#[bg=#242424,fg=#e0e0e0] #I #W #[bg=default,fg=#242424]"
+      set -g status-left "#[fg=colour0]#[bg=colour0,fg=colour15]   #S #[bg=default,fg=colour0]  "
+      set -g status-right "#[fg=colour8]󰉋  #{b:pane_current_path}   %H:%M "
+      set -g window-status-format "#[fg=colour8] #I #W "
+      set -g window-status-current-format "#[fg=colour0]#[bg=colour0,fg=colour15] #I #W #[bg=default,fg=colour0]"
       set -g window-status-separator ""
-      set -g pane-border-style "fg=#1e1e1e"
-      set -g pane-active-border-style "fg=#3a3a3a"
+      set -g pane-border-style "fg=colour0"
+      set -g pane-active-border-style "fg=colour8"
       set -g pane-border-lines single
-      set -g message-style "bg=#1a1a1a,fg=#e0e0e0"
-      set -g mode-style "bg=#3c3c3c,fg=#ffffff"
-      set -g display-panes-active-colour "#e0e0e0"
-      set -g display-panes-colour "#5a5a5a"
-      set -g clock-mode-colour "#e0e0e0"
+      set -g message-style "bg=colour0,fg=colour15"
+      set -g mode-style "bg=colour8,fg=colour15"
+      set -g display-panes-active-colour "colour15"
+      set -g display-panes-colour "colour8"
+      set -g clock-mode-colour "colour15"
     '';
   };
 }

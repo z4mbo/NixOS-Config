@@ -29,7 +29,7 @@ let
     auto_sync = true               # login screen follows wallpaper/colors/font
 
     [theme]
-    mode = "dark"
+    mode = "auto"                  # light by day, dark from sunset (see [location])
     source = "custom"
     custom_palette = "Monochrome"
     sync_color_scheme = true       # GTK/Qt/Electron apps follow dark mode
@@ -37,6 +37,9 @@ let
     [theme.templates]
     enable_builtin_templates = true
     builtin_ids = ["gtk3", "gtk4"] # GTK apps (Nautilus, GNOME apps...) use the palette
+
+    [location]
+    address = "Rome, Italy"        # sunrise/sunset for auto theme + weather
 
     [wallpaper]
     enabled = true
@@ -71,7 +74,16 @@ let
     capsule = false
     start = ["launcher", "workspace_apps"]
     center = ["active_window", "clock", "media"]
-    end = ["tray", "notifications", "volume", "brightness", "control_center", "cpu_temp", "cpu", "ram"]
+    end = ["tray", "notifications", "theme_cycle", "volume", "brightness", "control_center", "cpu_temp", "cpu", "ram"]
+
+    # Click: Auto -> Dark -> Light -> Auto (Auto = light by day, dark at night).
+    [widget.theme_cycle]
+    type = "custom_button"
+    glyph = "sun-moon"
+    tooltip = "Theme: click to cycle Auto / Dark / Light"
+
+    [widget.theme_cycle.actions]
+    left = "exec ${themeCycle}"
 
     # Workspaces as groups of the app icons open on each one.
     [widget.workspace_apps]
@@ -98,6 +110,10 @@ let
     [widget.clock]
     format = "{:%H:%M %a, %b %d}"
     tooltip_format = "{:%A, %B %d, %Y}"
+
+    # Click the volume icon to pick the output (Headphones / Speakers / Echo...).
+    [widget.volume.actions]
+    left = "panel-toggle control-center audio"
 
     [widget.media]
     artist_first = true
@@ -127,6 +143,19 @@ let
     [osd]
     position = "top_right"
     border_color = "#3a3a3a"
+  '';
+
+  # Cycles Noctalia's theme mode; everything else follows the color scheme.
+  themeCycle = pkgs.writeShellScript "theme-cycle" ''
+    cur=$(noctalia msg config-get theme.mode 2>/dev/null | tr -d "\"' ")
+    case "$cur" in
+      auto) next=dark ;;
+      dark) next=light ;;
+      *) next=auto ;;
+    esac
+    noctalia msg theme-mode-set "$next"
+    ${pkgs.libnotify}/bin/notify-send -a Theme -i weather-clear-night "Theme: $next" \
+      "$([ "$next" = auto ] && echo "Light by day, dark after sunset" || echo "Fixed $next mode")"
   '';
 
   # Copies GUI settings into the repo whenever Noctalia saves them.

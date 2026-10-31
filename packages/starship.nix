@@ -17,15 +17,16 @@
       right_format = "$cmd_duration$time";
 
       palettes.mono = {
-        pill = "#1a1a1a";
-        pill_alt = "#242424";
-        fg = "#e0e0e0";
-        dim = "#8a8a8a";
-        faint = "#5a5a5a";
-        red = "#d07a7a";
-        green = "#9fbf8f";
-        yellow = "#d8c38c";
-        white = "#ffffff";
+        # ANSI names, so the prompt follows Ghostty's light/dark theme.
+        pill = "black"; # slot 0: raised surface
+        pill_alt = "black";
+        fg = "bright-white"; # slot 15: strong text
+        dim = "bright-black"; # slot 8: dim text
+        faint = "bright-black";
+        red = "red";
+        green = "green";
+        yellow = "yellow";
+        white = "bright-white";
       };
 
       directory = {
