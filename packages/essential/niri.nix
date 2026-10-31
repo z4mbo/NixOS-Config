@@ -103,6 +103,9 @@ in
       "org.freedesktop.impl.portal.OpenURI" = [ "gtk" ];
       "org.freedesktop.impl.portal.ScreenCast" = [ "gnome" ];
       "org.freedesktop.impl.portal.Screenshot" = [ "gnome" ];
+      # niri can't bind app shortcuts through the GNOME portal; apps like Hex
+      # are driven by niri keybinds instead (see hex.nix).
+      "org.freedesktop.impl.portal.GlobalShortcuts" = [ "none" ];
     };
   };
 
@@ -227,6 +230,11 @@ in
         Mod+S { spawn "scratchpad" "toggle"; }
         Mod+Shift+S { spawn "scratchpad" "send"; }
         Mod+C { spawn-sh "noctalia msg panel-toggle control-center"; }
+
+        // Hex voice dictation (see hex.nix)
+        Mod+D { spawn "hex" "dictation" "toggle"; }
+        Mod+Shift+D { spawn "hex" "paste-last"; }
+        Mod+Ctrl+D { spawn "hex" "dictation" "cancel"; }
         Mod+Shift+Comma { spawn-sh "noctalia msg settings-toggle"; }
         Mod+Escape { spawn-sh "noctalia msg session lock"; }
         Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
