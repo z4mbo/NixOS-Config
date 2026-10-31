@@ -3,9 +3,6 @@ config_version = 16
 [bar.default]
 border = "#3a3a3a"
 capsule_thickness = 0.72999998740851879
-position = "bottom"
-reserve_space = false
-smart_auto_hide = true
 
 [lockscreen_widgets]
 enabled = false

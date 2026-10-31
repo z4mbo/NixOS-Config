@@ -2,7 +2,7 @@
 
 # tmux styled like the terminal/prompt (ANSI colors, so it follows the
 # terminal light/dark theme), rounded "pills",
-# status bar on top. Prefix is Ctrl+Space; mouse on; windows start at 1.
+# status bar on top. Prefix is Ctrl+B (default); mouse on; windows start at 1.
 #   prefix |  split right      prefix -  split down
 #   prefix h/j/k/l  move between panes   prefix r  reload config
 {
@@ -13,7 +13,7 @@
     escapeTime = 0;
     historyLimit = 50000;
     keyMode = "vi";
-    shortcut = "Space";
+    shortcut = "b"; # prefix Ctrl+B (tmux default)
     clock24 = true;
     extraConfig = ''
       set -g mouse on
