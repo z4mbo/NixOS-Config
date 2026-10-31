@@ -1,13 +1,24 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
+  environment.systemPackages = with pkgs; [
+    eza # ls with icons/git status
+    bat # cat with syntax highlighting
+  ];
+
+  # bat uses the terminal's own colors (matches the Monochrome theme).
+  environment.variables.BAT_THEME = "base16";
+
   programs.fish = {
     enable = true;
 
     shellAliases = {
-      ll = "ls -alF";
-      la = "ls -A";
-      l = "ls -CF";
+      ls = "eza --icons=auto --group-directories-first";
+      ll = "eza -l --icons=auto --group-directories-first --git --time-style=relative";
+      la = "eza -la --icons=auto --group-directories-first --git --time-style=relative";
+      lt = "eza --tree --level=2 --icons=auto";
+      l = "eza --icons=auto --group-directories-first";
+      cat = "bat --paging=never --style=plain";
       rebuild = "sudo nixos-rebuild switch --flake /etc/nixos#nixos";
     };
 

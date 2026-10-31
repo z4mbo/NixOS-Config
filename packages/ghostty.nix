@@ -36,7 +36,7 @@
     font-size = 18
     font-feature = calt
     font-feature = liga
-    adjust-cell-height = 12%
+    adjust-cell-height = 18%
     theme = /etc/xdg/ghostty/themes/monochrome
     background-opacity = 0.96
     background-blur = true

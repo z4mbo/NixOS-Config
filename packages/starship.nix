@@ -1,7 +1,13 @@
 { ... }:
 
-# Prompt: full path + git in rounded "pills", then a white NixOS logo + user,
-# in the black/grey noctalia palette.
+# Prompt (black/grey noctalia palette):
+#
+#   (󰉋  /etc/nixos)  (󰊢  main ✚1)                          1.2s  13:04
+#      z4mbo ›
+#
+# Line 2 is indented by one cell (the pill's rounded edge) so the NixOS logo
+# sits under the folder icon and the username under the path. Logo and user
+# are regular weight and dimmed so they read smaller than the path.
 # Written to /etc/starship.toml; fish integration is automatic.
 {
   programs.starship = {
@@ -9,14 +15,18 @@
     settings = {
       add_newline = true; # blank line between commands
       palette = "mono";
-      format = "$directory$git_branch$git_status$nix_shell$cmd_duration\n[ ](bold fg:white)$username$character";
+      format = "$directory$git_branch$git_status$nix_shell\n [ ](fg:white) $username$character";
+      right_format = "$cmd_duration$time";
 
       palettes.mono = {
-        pill = "#1c1c1c";
-        pill_alt = "#282828";
+        pill = "#1a1a1a";
+        pill_alt = "#242424";
         fg = "#e0e0e0";
-        muted = "#aaaaaa";
+        dim = "#8a8a8a";
+        faint = "#5a5a5a";
         red = "#d07a7a";
+        green = "#9fbf8f";
+        yellow = "#d8c38c";
         white = "#ffffff";
       };
 
@@ -24,44 +34,63 @@
         style = "fg:fg bg:pill bold";
         truncation_length = 0; # always the full path
         truncate_to_repo = false;
+        home_symbol = "~";
         read_only = " 󰌾";
-        read_only_style = "fg:red bg:pill bold";
-        format = "[](fg:pill)[󰉋 $path ]($style)[$read_only]($read_only_style)[](fg:pill) ";
+        read_only_style = "fg:red bg:pill";
+        format = "[](fg:pill)[󰉋  $path ]($style)[$read_only]($read_only_style)[](fg:pill) ";
       };
 
       git_branch = {
-        symbol = "󰊢 ";
-        style = "fg:muted bg:pill_alt bold";
-        format = "[](fg:pill_alt)[$symbol$branch ]($style)";
+        symbol = "󰊢  ";
+        style = "fg:dim bg:pill_alt";
+        format = "[](fg:pill_alt)[$symbol$branch]($style)";
       };
 
       git_status = {
-        style = "fg:muted bg:pill_alt";
-        format = "[$all_status$ahead_behind ]($style)[](fg:pill_alt) ";
+        style = "bg:pill_alt";
+        format = "[( $all_status$ahead_behind)]($style)[ ](bg:pill_alt)[](fg:pill_alt) ";
+        conflicted = "[=$count](fg:red bg:pill_alt)";
+        ahead = "[⇡$count](fg:green bg:pill_alt)";
+        behind = "[⇣$count](fg:yellow bg:pill_alt)";
+        diverged = "[⇕](fg:yellow bg:pill_alt)";
+        untracked = "[?$count](fg:dim bg:pill_alt)";
+        stashed = "[≡](fg:dim bg:pill_alt)";
+        modified = "[~$count](fg:yellow bg:pill_alt)";
+        staged = "[+$count](fg:green bg:pill_alt)";
+        renamed = "[»$count](fg:dim bg:pill_alt)";
+        deleted = "[-$count](fg:red bg:pill_alt)";
       };
 
       nix_shell = {
-        symbol = " ";
-        style = "fg:muted bg:pill";
-        format = "[](fg:pill)[$symbol$name ]($style)[](fg:pill) ";
-      };
-
-      cmd_duration = {
-        min_time = 500;
-        style = "fg:muted bg:pill";
-        format = "[](fg:pill)[󰔚 $duration ]($style)[](fg:pill) ";
+        symbol = "  ";
+        style = "fg:dim bg:pill";
+        format = "[](fg:pill)[$symbol$name]($style)[](fg:pill) ";
       };
 
       username = {
         show_always = true;
-        style_user = "bold fg:fg";
-        style_root = "bold fg:red";
+        style_user = "fg:dim";
+        style_root = "fg:red";
         format = "[$user]($style) ";
       };
 
       character = {
-        success_symbol = "[󰜴](bold fg:muted)";
-        error_symbol = "[󰜴](bold fg:red)";
+        success_symbol = "[›](fg:white)";
+        error_symbol = "[›](fg:red)";
+        vimcmd_symbol = "[‹](fg:white)";
+      };
+
+      cmd_duration = {
+        min_time = 1000;
+        style = "fg:faint";
+        format = "[󰥔 $duration]($style)  ";
+      };
+
+      time = {
+        disabled = false;
+        time_format = "%H:%M";
+        style = "fg:faint";
+        format = "[$time]($style)";
       };
 
       package.disabled = true;

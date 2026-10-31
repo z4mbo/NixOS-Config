@@ -79,11 +79,12 @@
 
         default-column-width { proportion 0.5; }
 
+        // Hairline, barely-visible grey frame.
         border {
             on
-            width 2
-            active-color "#aaaaaa"
-            inactive-color "#282828"
+            width 1
+            active-color "#3a3a3a"
+            inactive-color "#1e1e1e"
         }
 
         focus-ring {
