@@ -81,10 +81,9 @@ let
     hide_empty_workspaces = true
     show_workspace_label = true
     workspace_label_placement = "corner"
-    workspace_group_capsule = true
+    workspace_group_capsule = false   # no border around each workspace group
     workspace_group_content = "icons"
-    workspace_group_active_border_color = "primary"
-    workspace_group_inactive_border_color = "outline_variant"
+    icon_scale = 1.35
     group_single_icon_per_app = true
     prefer_symbolic_icons = false
     show_active_indicator = true

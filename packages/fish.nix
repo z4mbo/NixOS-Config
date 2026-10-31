@@ -32,9 +32,4 @@
       set -g fish_pager_color_progress 666666
     '';
   };
-
-  # Tools installed outside Nix (npm -g, pip --user, standalone binaries).
-  environment.extraInit = ''
-    export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"
-  '';
 }
