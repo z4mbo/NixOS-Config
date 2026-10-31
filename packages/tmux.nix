@@ -4,6 +4,7 @@
 # terminal light/dark theme), rounded "pills",
 # status bar on top. Prefix is Ctrl+B (default); mouse on; windows start at 1.
 #   prefix |  split right      prefix -  split down
+#   prefix ←/→/↑/↓  split toward that side
 #   prefix h/j/k/l  move between panes   prefix r  reload config
 # Sessions survive reboots (tmux-resurrect + tmux-continuum, see bottom).
 {
@@ -26,6 +27,11 @@
 
       bind | split-window -h -c "#{pane_current_path}"
       bind - split-window -v -c "#{pane_current_path}"
+      # prefix + arrow: split toward that side (new pane opens there)
+      bind Right split-window -h -c "#{pane_current_path}"
+      bind Left split-window -hb -c "#{pane_current_path}"
+      bind Down split-window -v -c "#{pane_current_path}"
+      bind Up split-window -vb -c "#{pane_current_path}"
       bind c new-window -c "#{pane_current_path}"
       bind h select-pane -L
       bind j select-pane -D
