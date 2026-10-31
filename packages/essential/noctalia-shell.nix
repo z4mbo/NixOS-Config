@@ -80,32 +80,16 @@ let
     capsule = false
     start = ["launcher", "workspace_apps"]
     center = ["active_window", "clock", "media"]
-    end = ["tray", "notifications", "theme_auto", "theme_dark", "theme_light", "volume", "brightness", "control_center", "cpu_temp", "cpu", "ram"]
+    end = ["tray", "notifications", "theme", "volume", "brightness", "control_center", "cpu_temp", "cpu", "ram"]
 
-    # Theme switcher: Auto (light by day, dark after sunset) / Dark / Light.
-    [widget.theme_auto]
+    # Theme menu: Auto / Dark / Light + window transparency.
+    [widget.theme]
     type = "custom_button"
     glyph = "sun-moon"
-    tooltip = "Theme: Auto (light by day, dark after sunset)"
+    tooltip = "Theme and window transparency"
 
-    [widget.theme_auto.actions]
-    left = "theme-mode-set auto"
-
-    [widget.theme_dark]
-    type = "custom_button"
-    glyph = "moon"
-    tooltip = "Theme: Dark"
-
-    [widget.theme_dark.actions]
-    left = "theme-mode-set dark"
-
-    [widget.theme_light]
-    type = "custom_button"
-    glyph = "sun"
-    tooltip = "Theme: Light"
-
-    [widget.theme_light.actions]
-    left = "theme-mode-set light"
+    [widget.theme.actions]
+    left = "exec ${themeMenu}"
 
     # Workspaces as groups of the app icons open on each one.
     [widget.workspace_apps]
@@ -121,6 +105,7 @@ let
     workspace_group_content = "icons"
     icon_scale = 1.35
     group_single_icon_per_app = false # one icon per window
+    hidden_workspaces = ["scratch"]   # scratchpad (Super+S) stays out of the bar
     prefer_symbolic_icons = false
     show_active_indicator = true
     active_indicator_color = "primary"
@@ -165,6 +150,40 @@ let
     [osd]
     position = "top_right"
     border_color = "#3a3a3a"
+  '';
+
+  # Bar "Theme" menu: color theme (Auto = light by day, dark after sunset) and
+  # niri window transparency, written to ~/.config/niri/appearance.kdl, which
+  # niri.nix includes and niri reloads live.
+  themeMenu = pkgs.writeShellScript "theme-menu" ''
+    appearance="$HOME/.config/niri/appearance.kdl"
+    theme=$(noctalia msg config-get theme.mode 2>/dev/null | tr -d "\"' ")
+    windows=$(sed -n 's|^// mode: ||p' "$appearance" 2>/dev/null | head -n1)
+    [ -n "$windows" ] || windows=solid
+    tick() { [ "$1" = "$2" ] && printf '✓' || printf '  '; }
+
+    choice=$(printf '%s\n' \
+      "$(tick "$theme" auto)  Theme: Auto (light by day, dark after sunset)" \
+      "$(tick "$theme" dark)  Theme: Dark" \
+      "$(tick "$theme" light)  Theme: Light" \
+      "$(tick "$windows" solid)  Windows: Solid" \
+      "$(tick "$windows" transparent)  Windows: Transparent + blur" \
+      "$(tick "$windows" inactive)  Windows: Inactive transparent + blur" \
+      | noctalia dmenu -p "Theme")
+
+    rule() {
+      printf '// mode: %s\nwindow-rule {\n' "$1"
+      [ "$1" = inactive ] && printf '    match is-focused=false\n'
+      printf '    opacity %s\n    background-effect {\n        blur true\n    }\n}\n' "$2"
+    }
+    case "$choice" in
+      *"Theme: Auto"*) noctalia msg theme-mode-set auto ;;
+      *"Theme: Dark"*) noctalia msg theme-mode-set dark ;;
+      *"Theme: Light"*) noctalia msg theme-mode-set light ;;
+      *"Windows: Solid"*) printf '// mode: solid\n' > "$appearance" ;;
+      *"Windows: Transparent"*) rule transparent 0.85 > "$appearance" ;;
+      *"Windows: Inactive"*) rule inactive 0.70 > "$appearance" ;;
+    esac
   '';
 
   # Copies GUI settings into the repo whenever Noctalia saves them.

@@ -1,5 +1,86 @@
 { lib, pkgs, ... }:
 
+let
+  # Scratchpad (Hyprland-style) on top of a hidden named workspace "scratch":
+  #   scratchpad send   -> focused window becomes floating and goes to "scratch"
+  #   scratchpad toggle -> bring every scratch window, floating and centered,
+  #                        above the current workspace; run again to hide them
+  #   scratchpad init   -> (at startup) move "scratch" after your workspaces
+  #   scratchpad goto N / moveto N -> Super(+Shift)+N, skipping "scratch"
+  scratchpad = pkgs.writeShellScriptBin "scratchpad" ''
+    set -u
+    export PATH=${lib.makeBinPath [ pkgs.jq pkgs.coreutils pkgs.libnotify ]}:$PATH
+    state="''${XDG_RUNTIME_DIR:-/tmp}/niri-scratchpad-shown"
+    ws=$(niri msg -j workspaces)
+    wins=$(niri msg -j windows)
+    scratch=$(jq -r '.[] | select(.name == "scratch") | .id' <<<"$ws")
+    scratch_out=$(jq -r '.[] | select(.name == "scratch") | .output' <<<"$ws")
+    cur_out=$(jq -r '.[] | select(.is_focused) | .output' <<<"$ws")
+    cur_idx=$(jq -r '.[] | select(.is_focused) | .idx' <<<"$ws")
+    [ -n "$scratch" ] || exit 1
+
+    # niri lists named workspaces first; keep "scratch" last so Super+1..9
+    # still mean your own workspaces.
+    last=$(jq --arg o "$scratch_out" '[.[] | select(.output == $o)] | length' <<<"$ws")
+    niri msg action move-workspace-to-index --reference scratch "$last" >/dev/null 2>&1 || true
+    [ "''${1:-}" = init ] && exit 0
+
+    # Scratch windows currently shown somewhere else.
+    shown=()
+    if [ -f "$state" ]; then
+      while read -r id; do
+        w=$(jq -r --argjson id "$id" '.[] | select(.id == $id) | .workspace_id' <<<"$wins")
+        [ -n "$w" ] && [ "$w" != "$scratch" ] && shown+=("$id")
+      done < "$state"
+    fi
+
+    # Workspace N on the focused monitor, not counting "scratch".
+    real_idx() {
+      local n=$1 sidx
+      sidx=$(jq -r --arg o "$cur_out" '.[] | select(.output == $o and .name == "scratch") | .idx' <<<"$ws")
+      if [ -n "$sidx" ] && [ "$n" -ge "$sidx" ]; then echo $((n + 1)); else echo "$n"; fi
+    }
+
+    case "''${1:-toggle}" in
+      goto) niri msg action focus-workspace "$(real_idx "$2")" ;;
+      moveto) niri msg action move-column-to-workspace "$(real_idx "$2")" ;;
+      send)
+        id=$(jq -r '.[] | select(.is_focused) | .id' <<<"$wins")
+        [ -n "$id" ] || exit 0
+        niri msg action move-window-to-floating --id "$id"
+        niri msg action move-window-to-workspace --window-id "$id" --focus false scratch
+        [ -f "$state" ] && grep -vx "$id" "$state" > "$state.tmp"; mv -f "$state.tmp" "$state" 2>/dev/null || true
+        ;;
+      toggle)
+        if [ ''${#shown[@]} -gt 0 ]; then
+          for id in "''${shown[@]}"; do
+            niri msg action move-window-to-workspace --window-id "$id" --focus false scratch
+          done
+          rm -f "$state"
+          exit 0
+        fi
+        ids=$(jq -r --argjson s "$scratch" '.[] | select(.workspace_id == $s) | .id' <<<"$wins")
+        if [ -z "$ids" ]; then
+          notify-send -a Scratchpad "Scratchpad is empty" "Send a window there with Super+Shift+S"
+          exit 0
+        fi
+        : > "$state"
+        for id in $ids; do
+          niri msg action move-window-to-floating --id "$id"
+          if [ "$cur_out" != "$scratch_out" ]; then
+            niri msg action move-window-to-monitor --id "$id" "$cur_out"
+          else
+            niri msg action move-window-to-workspace --window-id "$id" --focus false "$cur_idx"
+          fi
+          niri msg action center-window --id "$id"
+          echo "$id" >> "$state"
+          last=$id
+        done
+        niri msg action focus-window --id "$last"
+        ;;
+    esac
+  '';
+in
 {
   programs.niri = {
     enable = true;
@@ -28,6 +109,7 @@
   environment.systemPackages = with pkgs; [
     # niri auto-detects this on PATH and starts it on demand for X11 apps like Steam.
     xwayland-satellite
+    scratchpad
   ];
 
   environment.sessionVariables = {
@@ -100,6 +182,11 @@
 
     prefer-no-csd
 
+    // Hidden workspace that holds scratchpad windows (see `scratchpad`).
+    workspace "scratch" {
+        open-on-output "DP-1"
+    }
+
     window-rule {
         geometry-corner-radius 14
         clip-to-geometry true
@@ -124,19 +211,22 @@
     }
 
     spawn-at-startup "noctalia"
+    spawn-at-startup "scratchpad" "init"
 
     binds {
         Mod+Return { spawn "ghostty"; }
         Mod+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
-        Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
+        Mod+S { spawn "scratchpad" "toggle"; }
+        Mod+Shift+S { spawn "scratchpad" "send"; }
+        Mod+C { spawn-sh "noctalia msg panel-toggle control-center"; }
         Mod+Shift+Comma { spawn-sh "noctalia msg settings-toggle"; }
         Mod+Escape { spawn-sh "noctalia msg session lock"; }
         Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
         Mod+B { spawn-sh "noctalia msg bar-toggle"; }
         Mod+Shift+W { spawn-sh "noctalia msg panel-toggle wallpaper"; }
         Alt+Tab { spawn-sh "noctalia msg window-switcher hold"; }
-        Mod+Shift+S { spawn-sh "noctalia msg screenshot-region"; }
-        Print { spawn-sh "noctalia msg screenshot-fullscreen"; }
+        Print { spawn-sh "noctalia msg screenshot-region"; }
+        Shift+Print { spawn-sh "noctalia msg screenshot-fullscreen"; }
 
         XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
         XF86AudioLowerVolume allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
@@ -168,25 +258,25 @@
         Mod+Shift+K     { move-window-up-or-to-workspace-up; }
         Mod+Shift+L     { move-column-right-or-to-monitor-right; }
 
-        Mod+1 { focus-workspace 1; }
-        Mod+2 { focus-workspace 2; }
-        Mod+3 { focus-workspace 3; }
-        Mod+4 { focus-workspace 4; }
-        Mod+5 { focus-workspace 5; }
-        Mod+6 { focus-workspace 6; }
-        Mod+7 { focus-workspace 7; }
-        Mod+8 { focus-workspace 8; }
-        Mod+9 { focus-workspace 9; }
+        Mod+1 { spawn "scratchpad" "goto" "1"; }
+        Mod+2 { spawn "scratchpad" "goto" "2"; }
+        Mod+3 { spawn "scratchpad" "goto" "3"; }
+        Mod+4 { spawn "scratchpad" "goto" "4"; }
+        Mod+5 { spawn "scratchpad" "goto" "5"; }
+        Mod+6 { spawn "scratchpad" "goto" "6"; }
+        Mod+7 { spawn "scratchpad" "goto" "7"; }
+        Mod+8 { spawn "scratchpad" "goto" "8"; }
+        Mod+9 { spawn "scratchpad" "goto" "9"; }
 
-        Mod+Shift+1 { move-column-to-workspace 1; }
-        Mod+Shift+2 { move-column-to-workspace 2; }
-        Mod+Shift+3 { move-column-to-workspace 3; }
-        Mod+Shift+4 { move-column-to-workspace 4; }
-        Mod+Shift+5 { move-column-to-workspace 5; }
-        Mod+Shift+6 { move-column-to-workspace 6; }
-        Mod+Shift+7 { move-column-to-workspace 7; }
-        Mod+Shift+8 { move-column-to-workspace 8; }
-        Mod+Shift+9 { move-column-to-workspace 9; }
+        Mod+Shift+1 { spawn "scratchpad" "moveto" "1"; }
+        Mod+Shift+2 { spawn "scratchpad" "moveto" "2"; }
+        Mod+Shift+3 { spawn "scratchpad" "moveto" "3"; }
+        Mod+Shift+4 { spawn "scratchpad" "moveto" "4"; }
+        Mod+Shift+5 { spawn "scratchpad" "moveto" "5"; }
+        Mod+Shift+6 { spawn "scratchpad" "moveto" "6"; }
+        Mod+Shift+7 { spawn "scratchpad" "moveto" "7"; }
+        Mod+Shift+8 { spawn "scratchpad" "moveto" "8"; }
+        Mod+Shift+9 { spawn "scratchpad" "moveto" "9"; }
 
         Mod+R { switch-preset-column-width; }
         Mod+F { maximize-column; }
@@ -198,11 +288,17 @@
         xcursor-theme "Adwaita"
         xcursor-size 24
     }
+
+    // Window transparency mode (solid / transparent / inactive), written by
+    // the Theme menu in the bar. niri reloads it live.
+    include "/home/z4mbo/.config/niri/appearance.kdl"
   '';
 
   systemd.tmpfiles.rules = [
     "d /home/z4mbo/.config 0755 z4mbo users -"
     "d /home/z4mbo/.config/niri 0755 z4mbo users -"
     "L+ /home/z4mbo/.config/niri/config.kdl - - - - /etc/xdg/niri/config.kdl"
+    # Starts out solid (empty); the Theme menu rewrites it.
+    "f /home/z4mbo/.config/niri/appearance.kdl 0644 z4mbo users - // mode: solid"
   ];
 }
