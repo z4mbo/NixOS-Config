@@ -169,18 +169,36 @@ let
       "$(tick "$windows" inactive)  Windows: Inactive transparent + blur" \
       | noctalia dmenu -p "Theme")
 
-    rule() {
-      printf '// mode: %s\nwindow-rule {\n' "$1"
-      [ "$1" = inactive ] && printf '    match is-focused=false\n'
-      printf '    opacity %s\n    background-effect {\n        blur true\n    }\n}\n' "$2"
+    ghostty="$HOME/.config/ghostty/appearance"
+
+    # Glass: niri blurs the wallpaper behind windows; border must not paint a
+    # solid rectangle behind them. Ghostty does its own see-through background
+    # (text stays crisp); other apps use niri's window opacity.
+    glass() {
+      printf '// mode: %s\n' "$1"
+      printf 'window-rule {\n    draw-border-with-background false\n    background-effect {\n        blur true\n    }\n}\n'
+      if [ "$1" = transparent ]; then
+        printf 'window-rule {\n    exclude app-id="^com.mitchellh.ghostty$"\n    opacity 0.85\n}\n'
+      else
+        printf 'window-rule {\n    match is-focused=false\n    opacity 0.75\n}\n'
+      fi
+    }
+    reload_ghostty() {
+      for p in $(pgrep -x ghostty) $(pgrep -x .ghostty-wrappe); do kill -USR2 "$p"; done
     }
     case "$choice" in
       *"Theme: Auto"*) noctalia msg theme-mode-set auto ;;
       *"Theme: Dark"*) noctalia msg theme-mode-set dark ;;
       *"Theme: Light"*) noctalia msg theme-mode-set light ;;
-      *"Windows: Solid"*) printf '// mode: solid\n' > "$appearance" ;;
-      *"Windows: Transparent"*) rule transparent 0.85 > "$appearance" ;;
-      *"Windows: Inactive"*) rule inactive 0.70 > "$appearance" ;;
+      *"Windows: Solid"*)
+        printf '// mode: solid\n' > "$appearance"
+        : > "$ghostty"; reload_ghostty ;;
+      *"Windows: Transparent"*)
+        glass transparent > "$appearance"
+        printf 'background-opacity = 0.7\nbackground-blur = true\n' > "$ghostty"; reload_ghostty ;;
+      *"Windows: Inactive"*)
+        glass inactive > "$appearance"
+        : > "$ghostty"; reload_ghostty ;;
     esac
   '';
 

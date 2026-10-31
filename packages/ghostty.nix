@@ -13,13 +13,13 @@
   # text, 7/15 = normal/strong text. So anything drawn with ANSI colors
   # (starship, tmux, eza, tv, Helix, Claude Code, opencode...) flips with it.
   environment.etc."xdg/ghostty/themes/monochrome-dark".text = ''
-    background = #111111
+    background = #000000
     foreground = #e0e0e0
     cursor-color = #e0e0e0
-    cursor-text = #111111
-    selection-background = #3c3c3c
+    cursor-text = #000000
+    selection-background = #333333
     selection-foreground = #ffffff
-    palette = 0=#1c1c1c
+    palette = 0=#161616
     palette = 1=#d07a7a
     palette = 2=#9fbf8f
     palette = 3=#d8c38c
@@ -69,7 +69,7 @@
     font-feature = liga
     adjust-cell-height = 18%
     theme = light:/etc/xdg/ghostty/themes/monochrome-light,dark:/etc/xdg/ghostty/themes/monochrome-dark
-    background-opacity = 0.96
+    background-opacity = 1
     background-blur = true
     window-padding-x = 24
     window-padding-y = 20
@@ -89,6 +89,8 @@
     notify-on-command-finish = unfocused
     notify-on-command-finish-action = no-bell,notify
     notify-on-command-finish-after = 10s
+    # Glass mode from the bar's Theme menu (background-opacity override).
+    config-file = ?/home/z4mbo/.config/ghostty/appearance
   '';
 
   systemd.tmpfiles.rules = [
@@ -96,5 +98,6 @@
     "d /home/z4mbo/.config/ghostty 0755 z4mbo users -"
     "r /home/z4mbo/.config/ghostty/config.ghostty"
     "L+ /home/z4mbo/.config/ghostty/config - - - - /etc/xdg/ghostty/config"
+    "f /home/z4mbo/.config/ghostty/appearance 0644 z4mbo users -"
   ];
 }

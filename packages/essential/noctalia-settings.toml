@@ -81,16 +81,16 @@ mode = "dark"
 pure_black_dark = true
 
 [wallpaper.default]
-path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-9orlxx.jpg"
+path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-211xrg.jpg"
 
 [wallpaper.last]
-path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-9orlxx.jpg"
+path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-211xrg.jpg"
 
 [wallpaper.monitors.DP-1]
-path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-9orlxx.jpg"
+path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-211xrg.jpg"
 
 [wallpaper.monitors.HDMI-A-1]
-path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-9orlxx.jpg"
+path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-211xrg.jpg"
 
 [widget.workspaces]
 hide_when_empty = true

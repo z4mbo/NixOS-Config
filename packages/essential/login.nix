@@ -20,9 +20,9 @@
         };
         keyboard.layout = "it";
         cursor = {
-          theme = "Adwaita";
+          theme = "Bibata-Modern-Classic";
           size = 24;
-          path = pkgs.adwaita-icon-theme;
+          path = pkgs.bibata-cursors;
         };
       };
     };

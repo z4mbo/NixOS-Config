@@ -124,14 +124,14 @@ in
         position x=1920 y=0
         variable-refresh-rate
         focus-at-startup
-        backdrop-color "#111111"
+        backdrop-color "#000000"
     }
 
     // Secondary monitor: HP 25x, on the left.
     output "HDMI-A-1" {
         mode "1920x1080@143.981"
         position x=0 y=0
-        backdrop-color "#111111"
+        backdrop-color "#000000"
     }
 
     input {
@@ -181,6 +181,14 @@ in
     }
 
     prefer-no-csd
+
+    // Frosted-glass blur used by the Theme menu's transparent modes.
+    blur {
+        passes 4
+        offset 4.0
+        noise 0.03
+        saturation 1.3
+    }
 
     // Hidden workspace that holds scratchpad windows (see `scratchpad`).
     workspace "scratch" {
@@ -285,7 +293,7 @@ in
     }
 
     cursor {
-        xcursor-theme "Adwaita"
+        xcursor-theme "Bibata-Modern-Classic"
         xcursor-size 24
     }
 
