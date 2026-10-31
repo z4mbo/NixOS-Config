@@ -5,6 +5,7 @@
 # status bar on top. Prefix is Ctrl+B (default); mouse on; windows start at 1.
 #   prefix |  split right      prefix -  split down
 #   prefix h/j/k/l  move between panes   prefix r  reload config
+# Sessions survive reboots (tmux-resurrect + tmux-continuum, see bottom).
 {
   programs.tmux = {
     enable = true;
@@ -52,6 +53,19 @@
       set -g display-panes-active-colour "colour15"
       set -g display-panes-colour "colour8"
       set -g clock-mode-colour "colour15"
+
+      # --- sessions survive reboots ---
+      # resurrect saves sessions, windows, panes, layouts, working dirs, pane
+      # contents and a few programs; continuum auto-saves every 10 minutes and
+      # restores everything when tmux starts again. Manual: prefix Ctrl+S save,
+      # prefix Ctrl+R restore. Loaded last: continuum hooks into status-right.
+      set -g @resurrect-dir "$HOME/.local/share/tmux/resurrect"
+      set -g @resurrect-capture-pane-contents "on"
+      set -g @resurrect-processes "hx btop htop lazygit yazi 'tv' 'claude' 'codex' 'opencode' 'omp' 'ssh'"
+      set -g @continuum-save-interval "10"
+      set -g @continuum-restore "on"
+      run-shell ${pkgs.tmuxPlugins.resurrect}/share/tmux-plugins/resurrect/resurrect.tmux
+      run-shell ${pkgs.tmuxPlugins.continuum}/share/tmux-plugins/continuum/continuum.tmux
     '';
   };
 }
