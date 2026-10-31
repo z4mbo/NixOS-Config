@@ -1,5 +1,12 @@
 config_version = 16
 
+[bar.default]
+border = "on_surface_variant"
+capsule_thickness = 0.72999998740851879
+position = "bottom"
+reserve_space = false
+smart_auto_hide = true
+
 [lockscreen_widgets]
 enabled = false
 schema_version = 2
@@ -68,6 +75,10 @@ widget_order = [ "lockscreen-login-box@HDMI-A-1", "lockscreen-login-box@DP-1" ]
 
 [shell.launcher]
 app_grid = true
+default_view = "all"
+
+[theme]
+pure_black_dark = true
 
 [wallpaper.default]
 path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-yqg6r7.jpg"
@@ -80,3 +91,6 @@ path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-yqg6r7.jpg"
 
 [wallpaper.monitors.HDMI-A-1]
 path = "/home/z4mbo/Pictures/Wallpapers/wallhaven-yqg6r7.jpg"
+
+[widget.workspaces]
+hide_when_empty = true

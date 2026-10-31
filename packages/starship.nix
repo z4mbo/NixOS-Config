@@ -2,12 +2,11 @@
 
 # Prompt (black/grey noctalia palette):
 #
-#   (󰉋  /etc/nixos)  (󰊢  main ✚1)                          1.2s  13:04
-#      z4mbo ›
+#   (󰉋  /etc/nixos)  (󰊢  main +1)    z4mbo             1.2s  13:04
+#   › _
 #
-# Line 2 is indented by one cell (the pill's rounded edge) so the NixOS logo
-# sits under the folder icon and the username under the path. Logo and user
-# are regular weight and dimmed so they read smaller than the path.
+# Path, git and NixOS logo + user on one line, the command on the next.
+# Logo and user are regular weight and dimmed so they read smaller.
 # Written to /etc/starship.toml; fish integration is automatic.
 {
   programs.starship = {
@@ -15,7 +14,7 @@
     settings = {
       add_newline = true; # blank line between commands
       palette = "mono";
-      format = "$directory$git_branch$git_status$nix_shell\n [ ](fg:white) $username$character";
+      format = "$directory$git_branch$git_status$nix_shell [ ](fg:white) $username\n$character";
       right_format = "$cmd_duration$time";
 
       palettes.mono = {
