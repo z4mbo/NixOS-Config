@@ -34,6 +34,13 @@ let
   '';
 in
 {
+  # Channels shell out to these (files -> fd, text -> rg, previews -> bat).
+  environment.systemPackages = with pkgs; [
+    fd
+    ripgrep
+    bat
+  ];
+
   programs.television = {
     enable = true;
     enableFishIntegration = true;

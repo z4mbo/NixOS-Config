@@ -24,12 +24,14 @@ let
     exec ${lib.getExe pkgs.appimage-run} "$app" "$@"
   '';
 
+  # Named after the app's Wayland app-id so the bar/taskbar shows the right icon.
   desktop = pkgs.makeDesktopItem {
-    name = "t3code";
+    name = "com.t3tools.T3Code";
     desktopName = "T3 Code";
     comment = "Coding agent GUI (nightly)";
     exec = "t3code %U";
-    icon = "utilities-terminal";
+    icon = "${../assets/t3code.png}";
+    startupWMClass = "com.t3tools.T3Code";
     categories = [ "Development" ];
   };
 in

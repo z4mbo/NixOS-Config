@@ -66,7 +66,7 @@
     }
 
     layout {
-        gaps 8
+        gaps 12
         center-focused-column "never"
 
         preset-column-widths {
@@ -97,7 +97,7 @@
     prefer-no-csd
 
     window-rule {
-        geometry-corner-radius 8
+        geometry-corner-radius 14
         clip-to-geometry true
     }
 

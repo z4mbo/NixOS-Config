@@ -5,10 +5,6 @@
     ghostty
   ];
 
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-  ];
-
   # Black theme matching the noctalia "Monochrome" color scheme.
   environment.etc."xdg/ghostty/themes/monochrome".text = ''
     background = #111111
@@ -38,10 +34,22 @@
   environment.etc."xdg/ghostty/config".text = ''
     font-family = JetBrainsMono Nerd Font
     font-size = 18
+    font-feature = calt
+    font-feature = liga
+    adjust-cell-height = 12%
     theme = /etc/xdg/ghostty/themes/monochrome
-    background-opacity = 1
-    window-padding-x = 15
-    window-padding-y = 15
+    background-opacity = 0.96
+    background-blur = true
+    window-padding-x = 24
+    window-padding-y = 20
+    window-padding-balance = true
+    window-padding-color = extend
+    window-decoration = none
+    cursor-style = bar
+    cursor-style-blink = true
+    mouse-hide-while-typing = true
+    copy-on-select = clipboard
+    unfocused-split-opacity = 0.85
     mouse-scroll-multiplier = 3
     command = ${pkgs.fish}/bin/fish
     shell-integration = fish

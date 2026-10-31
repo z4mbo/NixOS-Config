@@ -22,6 +22,9 @@ let
     telemetry_enabled = false
     setup_wizard_enabled = false
 
+    [accessibility]
+    ui_scale = 1.15                # launcher, control center, panels a bit larger
+
     [shell.greeter_sync]
     auto_sync = true               # login screen follows wallpaper/colors/font
 
@@ -59,17 +62,33 @@ let
     [bar.default]
     position = "top"
     radius = 12
-    widget_spacing = 8
+    thickness = 40
+    scale = 1.15
+    padding = 16
+    widget_spacing = 10
     capsule = false
-    start = ["launcher", "workspaces"]
+    start = ["launcher", "workspace_apps"]
     center = ["active_window", "clock", "media"]
     end = ["tray", "notifications", "volume", "brightness", "control_center", "cpu_temp", "cpu", "ram"]
 
-    [widget.workspaces]
-    hide_when_empty = true
-    labels_only_when_occupied = true
-    focused_color = "primary"
-    occupied_color = "secondary"
+    # Workspaces as groups of the app icons open on each one.
+    [widget.workspace_apps]
+    type = "taskbar"
+    group_by_workspace = true
+    show_running = true
+    show_all_outputs = false
+    only_active_workspace = false
+    hide_empty_workspaces = true
+    show_workspace_label = true
+    workspace_label_placement = "corner"
+    workspace_group_capsule = true
+    workspace_group_content = "icons"
+    workspace_group_active_border_color = "primary"
+    workspace_group_inactive_border_color = "outline_variant"
+    group_single_icon_per_app = true
+    prefer_symbolic_icons = false
+    show_active_indicator = true
+    active_indicator_color = "primary"
 
     [widget.active_window]
     max_length = 300

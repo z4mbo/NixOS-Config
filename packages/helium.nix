@@ -14,7 +14,7 @@ let
 
   contents = pkgs.appimageTools.extract { inherit pname version src; };
 
-  helium = pkgs.appimageTools.wrapType2 {
+  base = pkgs.appimageTools.wrapType2 {
     inherit pname version src;
 
     extraInstallCommands = ''
@@ -28,6 +28,17 @@ let
         mkdir -p $out/share
         cp -r ${contents}/usr/share/icons $out/share/
       fi
+    '';
+  };
+
+  # Native Wayland and a slightly larger UI + pages (fonts looked small at 1440p).
+  helium = pkgs.symlinkJoin {
+    name = "helium-${version}";
+    paths = [ base ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      wrapProgram $out/bin/helium \
+        --add-flags "--ozone-platform=wayland --force-device-scale-factor=1.15"
     '';
   };
 in

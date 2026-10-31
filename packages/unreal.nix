@@ -1,14 +1,23 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
-# Unreal Engine isn't in nixpkgs (Epic's license requires logging in to
-# download). Install it once by hand:
-#   1. Download "Linux_Unreal_Engine_<version>.zip" from https://www.unrealengine.com/linux
-#   2. Unzip it to ~/Applications/UnrealEngine  (so Engine/ is directly inside)
-# Then launch "Unreal Engine" from the launcher (or `unreal-engine` in a terminal).
-# It runs inside an FHS environment with the libraries the editor expects.
+# Unreal Engine isn't in nixpkgs (Epic requires logging in to download it).
+#   1. Sign in at https://www.unrealengine.com/linux in Helium and download the
+#      latest "Linux_Unreal_Engine_<version>.zip" into ~/Downloads.
+#   2. Launch "Unreal Engine": the first run unpacks the zip into
+#      ~/Applications/UnrealEngine (notifications show progress), then opens it.
+# If nothing is downloaded yet, launching it opens the download page instead.
+# The editor runs inside an FHS environment with the libraries it expects.
 let
-  unrealFhs = pkgs.buildFHSEnv {
-    name = "unreal-engine";
+  ueRoot = "$HOME/Applications/UnrealEngine";
+
+  icon = pkgs.fetchurl {
+    url = "https://cdn.simpleicons.org/unrealengine/ffffff";
+    name = "unreal-engine.svg";
+    hash = "sha256-zU2k1MbWjOmfSX2QK0xhh8WTHPdOH5gsqGoBXCSoA70=";
+  };
+
+  fhs = pkgs.buildFHSEnv {
+    name = "unreal-engine-fhs";
     targetPkgs =
       p: with p; [
         vulkan-loader
@@ -45,29 +54,59 @@ let
         python3
       ];
     runScript = pkgs.writeShellScript "unreal-engine-run" ''
-      ue_root="''${UE_ROOT:-$HOME/Applications/UnrealEngine}"
-      editor="$ue_root/Engine/Binaries/Linux/UnrealEditor"
-      if [ ! -x "$editor" ]; then
-        echo "Unreal Editor not found at $editor" >&2
-        echo "Download it from https://www.unrealengine.com/linux and unzip to $ue_root" >&2
-        exit 1
-      fi
-      exec "$editor" "$@"
+      export LD_LIBRARY_PATH=/run/opengl-driver/lib''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+      exec "${ueRoot}/Engine/Binaries/Linux/UnrealEditor" "$@"
     '';
   };
 
+  notify = "${lib.getExe pkgs.libnotify} -a 'Unreal Engine' -i ${icon}";
+
+  launcher = pkgs.writeShellScriptBin "unreal-engine" ''
+    set -u
+    root="${ueRoot}"
+    editor="$root/Engine/Binaries/Linux/UnrealEditor"
+
+    if [ ! -x "$editor" ]; then
+      zip=$(ls -t "$HOME"/Downloads/Linux_Unreal_Engine*.zip 2>/dev/null | head -n1)
+      if [ -z "$zip" ]; then
+        ${notify} "Unreal Engine isn't installed yet" \
+          "Sign in and download the latest Linux zip into ~/Downloads, then launch Unreal Engine again."
+        exec ${pkgs.xdg-utils}/bin/xdg-open https://www.unrealengine.com/linux
+      fi
+
+      ${notify} "Installing Unreal Engine" "Unpacking $(basename "$zip"). This takes a few minutes…"
+      tmp="$root.partial"
+      rm -rf "$tmp"; mkdir -p "$tmp"
+      if ! ${lib.getExe pkgs.unzip} -q "$zip" -d "$tmp"; then
+        ${notify} -u critical "Unreal Engine install failed" "Couldn't unpack $zip"
+        exit 1
+      fi
+      # The zip may or may not have a top-level folder around Engine/.
+      engine=$(find "$tmp" -maxdepth 2 -type d -name Engine | head -n1)
+      rm -rf "$root"
+      mv "$(dirname "$engine")" "$root"
+      rm -rf "$tmp"
+      chmod +x "$editor" 2>/dev/null || true
+      ${notify} "Unreal Engine installed" "Starting the editor…"
+    fi
+
+    cd "$HOME"
+    exec ${fhs}/bin/unreal-engine-fhs "$@"
+  '';
+
   desktop = pkgs.makeDesktopItem {
-    name = "unreal-engine";
+    name = "UnrealEditor";
     desktopName = "Unreal Engine";
-    comment = "Unreal Editor (manually installed in ~/Applications/UnrealEngine)";
+    comment = "Unreal Editor";
     exec = "unreal-engine %U";
-    icon = "applications-games";
+    icon = "${icon}";
+    startupWMClass = "UnrealEditor";
     categories = [ "Development" "Game" ];
   };
 in
 {
   environment.systemPackages = [
-    unrealFhs
+    launcher
     desktop
   ];
 }

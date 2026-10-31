@@ -7,7 +7,7 @@
   programs.starship = {
     enable = true;
     settings = {
-      add_newline = false;
+      add_newline = true; # blank line between commands
       palette = "mono";
       format = "$directory$git_branch$git_status$nix_shell$cmd_duration\n[ ](bold fg:white)$username$character";
 
@@ -60,8 +60,8 @@
       };
 
       character = {
-        success_symbol = "[❯](bold fg:muted)";
-        error_symbol = "[❯](bold fg:red)";
+        success_symbol = "[󰜴](bold fg:muted)";
+        error_symbol = "[󰜴](bold fg:red)";
       };
 
       package.disabled = true;
