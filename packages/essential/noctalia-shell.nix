@@ -4,10 +4,14 @@
 # clipboard history, polkit agent. Started by niri (see niri.nix).
 #
 # Dotfiles:
-#   ~/.config/noctalia/config.toml           -> base config below (read-only, from Nix)
+#   ~/.config/noctalia/config.toml              -> base config below (read-only, from Nix)
 #   ~/.config/noctalia/palettes/Monochrome.json -> black/grey palette (noctalia-monochrome.json)
-#   ~/.local/state/noctalia/settings.toml   -> changes made in Noctalia's Settings GUI
-#                                             (these win over config.toml)
+#   ~/.local/state/noctalia/settings.toml       -> everything you change in Noctalia's
+#                                                 Settings GUI (wins over config.toml)
+#
+# GUI settings are never lost: every time settings.toml changes it's copied to
+# noctalia-settings.toml in this repo (committed + pushed by `update`), and on a
+# fresh install that copy is restored if settings.toml doesn't exist yet.
 let
   home = "/home/z4mbo";
 
@@ -50,6 +54,64 @@ let
     [bluetooth]
     connect_when_enabled = true
     connection_notifications = true
+
+    # Layout ported from the old v4 setup.
+    [bar.default]
+    position = "top"
+    radius = 12
+    widget_spacing = 8
+    capsule = false
+    start = ["launcher", "workspaces"]
+    center = ["active_window", "clock", "media"]
+    end = ["tray", "notifications", "volume", "brightness", "control_center", "cpu_temp", "cpu", "ram"]
+
+    [widget.workspaces]
+    hide_when_empty = true
+    labels_only_when_occupied = true
+    focused_color = "primary"
+    occupied_color = "secondary"
+
+    [widget.active_window]
+    max_length = 300
+    title_scroll = "on_hover"
+
+    [widget.clock]
+    format = "{:%H:%M %a, %b %d}"
+    tooltip_format = "{:%A, %B %d, %Y}"
+
+    [widget.media]
+    artist_first = true
+    hide_when_no_media = true
+
+    [widget.cpu_temp]
+    type = "sysmon"
+    stat = "cpu_temp"
+
+    [widget.cpu]
+    type = "sysmon"
+    stat = "cpu_usage"
+
+    [widget.ram]
+    type = "sysmon"
+    stat = "ram_used"
+
+    [shell.launcher]
+    categories = false
+    track_usage = true
+
+    [notification]
+    position = "top_right"
+
+    [osd]
+    position = "top_right"
+  '';
+
+  # Copies GUI settings into the repo whenever Noctalia saves them.
+  backupSettings = pkgs.writeShellScript "noctalia-settings-backup" ''
+    src="$HOME/.local/state/noctalia/settings.toml"
+    dst=/etc/nixos/packages/essential/noctalia-settings.toml
+    [ -f "$src" ] && ! ${pkgs.diffutils}/bin/cmp -s "$src" "$dst" && cp "$src" "$dst"
+    exit 0
   '';
 in
 {
@@ -80,5 +142,22 @@ in
     "d ${home}/.config/noctalia/palettes 0755 z4mbo users -"
     "L+ ${home}/.config/noctalia/config.toml - - - - ${config}"
     "L+ ${home}/.config/noctalia/palettes/Monochrome.json - - - - ${./noctalia-monochrome.json}"
+    # Restore GUI settings from the repo only if none exist yet (fresh install).
+    "d ${home}/.local/state/noctalia 0700 z4mbo users -"
+    "C ${home}/.local/state/noctalia/settings.toml - - - - ${./noctalia-settings.toml}"
+    "z ${home}/.local/state/noctalia/settings.toml 0644 z4mbo users -"
   ];
+
+  systemd.user.services.noctalia-settings-backup = {
+    description = "Copy Noctalia GUI settings into /etc/nixos";
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = backupSettings;
+    };
+  };
+
+  systemd.user.paths.noctalia-settings-backup = {
+    wantedBy = [ "default.target" ];
+    pathConfig.PathChanged = "%h/.local/state/noctalia/settings.toml";
+  };
 }

@@ -123,8 +123,7 @@
 
     binds {
         Mod+Return { spawn "ghostty"; }
-        Mod+Space { spawn "vicinae" "toggle"; }
-        Mod+Shift+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
+        Mod+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
         Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
         Mod+Shift+Comma { spawn-sh "noctalia msg settings-toggle"; }
         Mod+Escape { spawn-sh "noctalia msg session lock"; }

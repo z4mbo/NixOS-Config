@@ -2,13 +2,19 @@
 
 # Updates
 #   - A user timer checks every 3 hours (and after login) whether nixpkgs
-#     (NixOS + every app), Noctalia, or Helium have something newer than what's
-#     installed, and sends a desktop notification with the list.
+#     (NixOS + every app), Noctalia, Helium, Claude Desktop or ChatGPT Desktop
+#     have something newer than what's installed, and sends a notification.
+#     (T3 Code nightly updates itself.)
 #   - `update` (in any terminal) pulls everything to the latest version, rebuilds,
 #     keeps the last 2 generations, then commits and pushes /etc/nixos to GitHub.
 #   - `update-check` runs the check by hand.
 let
   flakeDir = "/etc/nixos";
+
+  debApps = lib.concatStringsSep "\n" [
+    "Claude Desktop|packages/claude.nix|https://downloads.claude.ai/claude-desktop/apt/stable/dists/stable/main/binary-amd64/Packages"
+    "ChatGPT Desktop|packages/chatgpt.nix|https://persistent.oaistatic.com/codex-app-prod/linux/deb/dists/stable/main/binary-amd64/Packages"
+  ];
   path = lib.makeBinPath (with pkgs; [
     coreutils
     gnugrep
@@ -41,6 +47,15 @@ let
     helium_new=$(curl -fsSL https://api.github.com/repos/imputnet/helium-linux/releases/latest | jq -r .tag_name)
     [ -n "$helium_new" ] && [ "$helium_new" != "null" ] && [ "$helium_new" != "$helium_cur" ] \
       && echo "Helium $helium_cur -> $helium_new"
+
+    # Official desktop apps from vendor apt repos: name|nix file|Packages URL
+    while IFS='|' read -r name file repo; do
+      cur=$(sed -n 's/^ *version = "\(.*\)";/\1/p' "$file" | head -n1)
+      new=$(curl -fsSL "$repo" | sed -n 's/^Version: //p' | tail -n1)
+      [ -n "$new" ] && [ "$new" != "$cur" ] && echo "$name $cur -> $new"
+    done <<'APPS'
+${debApps}
+APPS
     exit 0
   '';
 
@@ -74,6 +89,19 @@ let
       sri=$(nix hash convert --hash-algo sha256 --to sri "''${digest#sha256:}")
       sed -i "s|^\( *version = \)\".*\";|\1\"$helium_new\";|; s|^\( *hash = \)\"sha256-.*\";|\1\"$sri\";|" packages/helium.nix
     fi
+
+    while IFS='|' read -r name file repo; do
+      cur=$(sed -n 's/^ *version = "\(.*\)";/\1/p' "$file" | head -n1)
+      meta=$(curl -fsSL "$repo" | awk '/^Version: /{v=$2} /^SHA256: /{h=$2} END{print v, h}')
+      new=''${meta% *}; sha=''${meta#* }
+      if [ -n "$new" ] && [ "$new" != "$cur" ]; then
+        echo ":: Updating $name $cur -> $new"
+        sri=$(nix hash convert --hash-algo sha256 --to sri "$sha")
+        sed -i "s|^\( *version = \)\".*\";|\1\"$new\";|; s|^\( *hash = \)\"sha256-.*\";|\1\"$sri\";|" "$file"
+      fi
+    done <<'APPS'
+${debApps}
+APPS
 
     echo ":: Rebuilding"
     git add -A
