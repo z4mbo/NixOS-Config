@@ -13,6 +13,11 @@
       passwordlessSyncUsers = [ "z4mbo" ];
       settings = {
         session.default = "niri";
+        # Always the look synced from Noctalia; no scheme picker on the login screen.
+        appearance = {
+          scheme = "Synced";
+          scheme_selector_position = "hidden";
+        };
         keyboard.layout = "it";
         cursor = {
           theme = "Adwaita";

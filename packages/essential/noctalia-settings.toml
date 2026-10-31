@@ -78,7 +78,7 @@ app_grid = true
 default_view = "all"
 
 [theme]
-mode = "auto"
+mode = "dark"
 pure_black_dark = true
 
 [wallpaper.default]

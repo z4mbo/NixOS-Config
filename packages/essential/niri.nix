@@ -102,6 +102,16 @@
         clip-to-geometry true
     }
 
+    // Inactive windows: slightly see-through with the background blurred
+    // behind them; the focused window stays fully opaque.
+    window-rule {
+        match is-focused=false
+        opacity 0.85
+        background-effect {
+            blur true
+        }
+    }
+
     // Noctalia settings window floats.
     window-rule {
         match app-id="dev.noctalia.Noctalia"

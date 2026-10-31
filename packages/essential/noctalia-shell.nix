@@ -25,6 +25,10 @@ let
     [accessibility]
     ui_scale = 1.15                # launcher, control center, panels a bit larger
 
+    [lockscreen]
+    blur_intensity = 0.0           # show the desktop wallpaper as-is
+    tint_intensity = 0.12          # just enough for the clock/password to stay readable
+
     [shell.greeter_sync]
     auto_sync = true               # login screen follows wallpaper/colors/font
 
@@ -54,6 +58,8 @@ let
     enable_ddcutil = true          # external monitors over DDC/CI
 
     [hooks]
+    # Login screen always matches the current wallpaper/colors/font.
+    started = "noctalia msg greeter-sync"
     # Keep GNOME's wallpaper in sync with the one picked in Noctalia.
     wallpaper_changed = "gsettings set org.gnome.desktop.background picture-uri \"file://$NOCTALIA_WALLPAPER_PATH\"; gsettings set org.gnome.desktop.background picture-uri-dark \"file://$NOCTALIA_WALLPAPER_PATH\""
 
@@ -74,16 +80,32 @@ let
     capsule = false
     start = ["launcher", "workspace_apps"]
     center = ["active_window", "clock", "media"]
-    end = ["tray", "notifications", "theme_cycle", "volume", "brightness", "control_center", "cpu_temp", "cpu", "ram"]
+    end = ["tray", "notifications", "theme_auto", "theme_dark", "theme_light", "volume", "brightness", "control_center", "cpu_temp", "cpu", "ram"]
 
-    # Click: Auto -> Dark -> Light -> Auto (Auto = light by day, dark at night).
-    [widget.theme_cycle]
+    # Theme switcher: Auto (light by day, dark after sunset) / Dark / Light.
+    [widget.theme_auto]
     type = "custom_button"
     glyph = "sun-moon"
-    tooltip = "Theme: click to cycle Auto / Dark / Light"
+    tooltip = "Theme: Auto (light by day, dark after sunset)"
 
-    [widget.theme_cycle.actions]
-    left = "exec ${themeCycle}"
+    [widget.theme_auto.actions]
+    left = "theme-mode-set auto"
+
+    [widget.theme_dark]
+    type = "custom_button"
+    glyph = "moon"
+    tooltip = "Theme: Dark"
+
+    [widget.theme_dark.actions]
+    left = "theme-mode-set dark"
+
+    [widget.theme_light]
+    type = "custom_button"
+    glyph = "sun"
+    tooltip = "Theme: Light"
+
+    [widget.theme_light.actions]
+    left = "theme-mode-set light"
 
     # Workspaces as groups of the app icons open on each one.
     [widget.workspace_apps]
@@ -143,19 +165,6 @@ let
     [osd]
     position = "top_right"
     border_color = "#3a3a3a"
-  '';
-
-  # Cycles Noctalia's theme mode; everything else follows the color scheme.
-  themeCycle = pkgs.writeShellScript "theme-cycle" ''
-    cur=$(noctalia msg config-get theme.mode 2>/dev/null | tr -d "\"' ")
-    case "$cur" in
-      auto) next=dark ;;
-      dark) next=light ;;
-      *) next=auto ;;
-    esac
-    noctalia msg theme-mode-set "$next"
-    ${pkgs.libnotify}/bin/notify-send -a Theme -i weather-clear-night "Theme: $next" \
-      "$([ "$next" = auto ] && echo "Light by day, dark after sunset" || echo "Fixed $next mode")"
   '';
 
   # Copies GUI settings into the repo whenever Noctalia saves them.
