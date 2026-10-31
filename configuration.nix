@@ -26,5 +26,5 @@ in
     ./hardware-configuration.nix
   ] ++ collectNixModules ./packages;
 
-  system.stateVersion = "25.11";
+  system.stateVersion = "26.11";
 }

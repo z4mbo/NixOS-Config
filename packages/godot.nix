@@ -2,6 +2,6 @@
 
 {
   environment.systemPackages = with pkgs; [
-    godot_4_6
+    godot # always the newest stable Godot 4.x in nixpkgs
   ];
 }

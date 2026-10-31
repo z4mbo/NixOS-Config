@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 
 {
   programs.niri = {
@@ -17,7 +17,7 @@
       xdg-desktop-portal-gtk
     ];
     config.niri = {
-      default = [ "gtk" ];
+      default = lib.mkForce [ "gtk" ];
       "org.freedesktop.impl.portal.FileChooser" = [ "gtk" ];
       "org.freedesktop.impl.portal.OpenURI" = [ "gtk" ];
       "org.freedesktop.impl.portal.ScreenCast" = [ "gnome" ];
@@ -36,10 +36,20 @@
   };
 
   environment.etc."xdg/niri/config.kdl".text = ''
+    // Main monitor: Samsung Odyssey G60SD, on the right.
     output "DP-1" {
         mode "2560x1440@359.999"
+        position x=1920 y=0
         variable-refresh-rate
-        backdrop-color "#232136"
+        focus-at-startup
+        backdrop-color "#111111"
+    }
+
+    // Secondary monitor: HP 25x, on the left.
+    output "HDMI-A-1" {
+        mode "1920x1080@143.981"
+        position x=0 y=0
+        backdrop-color "#111111"
     }
 
     input {
@@ -72,14 +82,14 @@
         border {
             on
             width 2
-            active-color "#56526e"
-            inactive-color "#2a283e"
+            active-color "#aaaaaa"
+            inactive-color "#282828"
         }
 
         focus-ring {
             off
             width 2
-            active-color "#56526e"
+            active-color "#aaaaaa"
             inactive-color "#00000000"
         }
     }
@@ -91,37 +101,69 @@
         clip-to-geometry true
     }
 
+    // Noctalia settings window floats.
+    window-rule {
+        match app-id="dev.noctalia.Noctalia"
+        open-floating true
+        default-column-width { fixed 1080; }
+        default-window-height { fixed 920; }
+    }
+
+    // Blurred wallpaper behind niri's overview.
+    layer-rule {
+        match namespace="^noctalia-backdrop"
+        place-within-backdrop true
+    }
+
     debug {
         honor-xdg-activation-with-invalid-serial
     }
 
-    spawn-at-startup "noctalia-shell" "--no-duplicate"
+    spawn-at-startup "noctalia"
 
     binds {
         Mod+Return { spawn "ghostty"; }
-        Mod+Space { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
-        Mod+B { spawn "noctalia-shell" "ipc" "call" "bar" "toggle"; }
+        Mod+Space { spawn "vicinae" "toggle"; }
+        Mod+Shift+Space { spawn-sh "noctalia msg panel-toggle launcher"; }
+        Mod+S { spawn-sh "noctalia msg panel-toggle control-center"; }
+        Mod+Shift+Comma { spawn-sh "noctalia msg settings-toggle"; }
+        Mod+Escape { spawn-sh "noctalia msg session lock"; }
+        Mod+V { spawn-sh "noctalia msg panel-toggle clipboard"; }
+        Mod+B { spawn-sh "noctalia msg bar-toggle"; }
+        Mod+Shift+W { spawn-sh "noctalia msg panel-toggle wallpaper"; }
+        Alt+Tab { spawn-sh "noctalia msg window-switcher hold"; }
+        Mod+Shift+S { spawn-sh "noctalia msg screenshot-region"; }
+        Print { spawn-sh "noctalia msg screenshot-fullscreen"; }
+
+        XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "noctalia msg volume-up"; }
+        XF86AudioLowerVolume allow-when-locked=true { spawn-sh "noctalia msg volume-down"; }
+        XF86AudioMute allow-when-locked=true { spawn-sh "noctalia msg volume-mute"; }
+        XF86MonBrightnessUp allow-when-locked=true { spawn-sh "noctalia msg brightness-up"; }
+        XF86MonBrightnessDown allow-when-locked=true { spawn-sh "noctalia msg brightness-down"; }
         Mod+E { spawn "nautilus"; }
         Mod+W { toggle-window-floating; }
         Mod+Q { close-window; }
 
-        Mod+Left  { focus-column-left; }
-        Mod+Down  { focus-window-down; }
-        Mod+Up    { focus-window-up; }
-        Mod+Right { focus-column-right; }
-        Mod+H     { focus-column-left; }
-        Mod+J     { focus-window-down; }
-        Mod+K     { focus-window-up; }
-        Mod+L     { focus-column-right; }
+        // Focus/move across windows, workspaces and monitors as one grid:
+        // H/L walk columns and spill over onto the neighbouring monitor,
+        // J/K walk windows in a column and spill over to the workspace below/above.
+        Mod+Left  { focus-column-or-monitor-left; }
+        Mod+Down  { focus-window-or-workspace-down; }
+        Mod+Up    { focus-window-or-workspace-up; }
+        Mod+Right { focus-column-or-monitor-right; }
+        Mod+H     { focus-column-or-monitor-left; }
+        Mod+J     { focus-window-or-workspace-down; }
+        Mod+K     { focus-window-or-workspace-up; }
+        Mod+L     { focus-column-or-monitor-right; }
 
-        Mod+Shift+Left  { move-column-left; }
-        Mod+Shift+Down  { move-window-down; }
-        Mod+Shift+Up    { move-window-up; }
-        Mod+Shift+Right { move-column-right; }
-        Mod+Shift+H     { move-column-left; }
-        Mod+Shift+J     { move-window-down; }
-        Mod+Shift+K     { move-window-up; }
-        Mod+Shift+L     { move-column-right; }
+        Mod+Shift+Left  { move-column-left-or-to-monitor-left; }
+        Mod+Shift+Down  { move-window-down-or-to-workspace-down; }
+        Mod+Shift+Up    { move-window-up-or-to-workspace-up; }
+        Mod+Shift+Right { move-column-right-or-to-monitor-right; }
+        Mod+Shift+H     { move-column-left-or-to-monitor-left; }
+        Mod+Shift+J     { move-window-down-or-to-workspace-down; }
+        Mod+Shift+K     { move-window-up-or-to-workspace-up; }
+        Mod+Shift+L     { move-column-right-or-to-monitor-right; }
 
         Mod+1 { focus-workspace 1; }
         Mod+2 { focus-workspace 2; }
@@ -158,8 +200,6 @@
   systemd.tmpfiles.rules = [
     "d /home/z4mbo/.config 0755 z4mbo users -"
     "d /home/z4mbo/.config/niri 0755 z4mbo users -"
-    "d /home/z4mbo/.config/noctalia 0755 z4mbo users -"
-    "z /home/z4mbo/.config/noctalia/settings.json 0644 z4mbo users -"
     "L+ /home/z4mbo/.config/niri/config.kdl - - - - /etc/xdg/niri/config.kdl"
   ];
 }

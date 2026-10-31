@@ -1,0 +1,57 @@
+# z4mbo NixOS config
+
+Flake-based NixOS (unstable) with niri + Noctalia v5, black "Monochrome" theme.
+
+## Layout
+
+Every `.nix` file under `packages/` is imported automatically. Each file holds
+**both the install and the dotfiles** for one app. Configs are generated into
+the Nix store and symlinked into `~/.config` at boot/rebuild.
+
+| File | What |
+|---|---|
+| `packages/essential/niri.nix` | niri compositor, monitors, keybinds (`~/.config/niri/config.kdl`) |
+| `packages/essential/noctalia-shell.nix` | Noctalia shell, palette, wallpaper, brightness, Bluetooth (`~/.config/noctalia/`) |
+| `packages/essential/login.nix` | Noctalia Greeter login screen (auto-synced from Noctalia) |
+| `packages/essential/gnome.nix` | GNOME as a second session |
+| `packages/essential/vicinae.nix` | Vicinae launcher (Raycast-like), theme |
+| `packages/essential/updates.nix` | update notifier + `update` command |
+| `packages/ghostty.nix` | Ghostty terminal + theme |
+| `packages/fish.nix`, `starship.nix`, `television.nix` | shell, prompt, fuzzy finder |
+| `packages/helium.nix` | Helium browser (AppImage) |
+| `packages/claude.nix`, `chatgpt.nix`, `oh-my-pi.nix` | AI CLIs + web-app launchers |
+| `packages/steam.nix`, `battlenet.nix` | gaming (Proton-GE, gamemode, gamescope, Lutris) |
+| `packages/godot.nix`, `unity.nix`, `unreal.nix` | game engines |
+
+GUI changes made in Noctalia's settings go to `~/.local/state/noctalia/settings.toml`
+and override `config.toml`.
+
+## Commands
+
+- `update` - update everything to latest, rebuild, keep 2 generations, push to GitHub
+- `update-check` - list pending updates (also notified automatically every 3h)
+- `rebuild` - rebuild from the current config without updating
+
+## Keybinds (niri)
+
+| Key | Action |
+|---|---|
+| Super+Space | Vicinae launcher |
+| Super+Shift+Space | Noctalia launcher |
+| Super+Return | Ghostty |
+| Super+E | Nautilus |
+| Super+H/J/K/L (or arrows) | focus left/down/up/right - crosses monitors (H/L) and workspaces (J/K) |
+| Super+Shift+H/J/K/L | move window the same way |
+| Super+1..9 / Super+Shift+1..9 | go to / move to workspace |
+| Super+S | control center (Wi-Fi, Bluetooth, brightness, audio) |
+| Super+V | clipboard history |
+| Super+B | toggle bar |
+| Super+Shift+W | wallpaper picker |
+| Super+Shift+Comma | Noctalia settings |
+| Super+Escape | lock |
+| Super+Shift+S / Print | screenshot region / full |
+| Alt+Tab | window switcher |
+| Super+Q | close window |
+| Super+W | toggle floating |
+| Super+R / F / Shift+F | cycle width / maximize / fullscreen |
+| Super+Shift+E | quit niri |

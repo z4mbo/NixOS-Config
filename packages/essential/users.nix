@@ -3,12 +3,11 @@
 {
   users.users.z4mbo = {
     isNormalUser = true;
-    extraGroups = [ "networkmanager" "wheel" "video" ];
-    shell = pkgs.zsh;
+    extraGroups = [ "networkmanager" "wheel" "video" "gamemode" ];
+    shell = pkgs.fish;
   };
 
-  users.users.root.shell = pkgs.zsh;
-
+  # Passwordless sudo so AI agents can rebuild without prompting.
   security.sudo.extraRules = [
     {
       users = [ "z4mbo" ];
