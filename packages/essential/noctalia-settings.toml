@@ -76,6 +76,7 @@ widget_order = [ "lockscreen-login-box@HDMI-A-1", "lockscreen-login-box@DP-1" ]
 [shell.launcher]
 app_grid = true
 default_view = "all"
+sort_by_usage = false
 
 [theme]
 pure_black_dark = true
