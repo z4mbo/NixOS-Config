@@ -105,7 +105,8 @@ let
     group_single_icon_per_app = false # one icon per window
     hidden_workspaces = ["scratch"]   # scratchpad (Super+S) stays out of the bar
     prefer_symbolic_icons = false
-    show_active_indicator = false     # no underline under the focused window
+    show_active_indicator = true      # small dot under the focused window's icon
+    active_indicator_color = "primary"
 
     [widget.active_window]
     max_length = 300

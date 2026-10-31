@@ -3,6 +3,9 @@ config_version = 16
 [bar.default]
 border = "#3a3a3a"
 capsule_thickness = 0.72999998740851879
+compositor_blur = false
+scale = 1.1000000089406967
+shadow = false
 
 [lockscreen_widgets]
 enabled = false
@@ -71,7 +74,6 @@ widget_order = [ "lockscreen-login-box@HDMI-A-1", "lockscreen-login-box@DP-1" ]
         show_weather = true
 
 [shell.launcher]
-app_grid = true
 default_view = "all"
 
 [theme]
