@@ -1,8 +1,11 @@
 { pkgs, ... }:
 
-# ChatGPT: OpenAI Codex CLI (`codex`) + the official ChatGPT Desktop app
-# (ChatGPT, ChatGPT Work, Codex), from OpenAI's apt repository. `update` bumps
-# the version.
+# ChatGPT: the official ChatGPT Desktop app (ChatGPT, ChatGPT Work, Codex),
+# from OpenAI's apt repository (`update` bumps it), + the Codex CLI.
+#
+# The CLI is an npm global install in ~/.npm-global that updates itself
+# (`codex update`, or T3 Code's update button). Fresh machine:
+#   npm install -g @openai/codex
 let
   version = "26.1027.30824";
   hash = "sha256-ThOaRPfJF6ZD8t0BStMimN0wrsbTJNMjUksZD3ZnaEw=";
@@ -22,8 +25,5 @@ let
   };
 in
 {
-  environment.systemPackages = [
-    pkgs.codex
-    chatgpt-desktop
-  ];
+  environment.systemPackages = [ chatgpt-desktop ];
 }

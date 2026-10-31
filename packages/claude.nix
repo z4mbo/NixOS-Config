@@ -1,7 +1,11 @@
 { pkgs, ... }:
 
 # Claude: Claude Code CLI + the official Claude Desktop app (chat, Cowork,
-# Claude Code), from Anthropic's apt repository. `update` bumps the version.
+# Claude Code), from Anthropic's apt repository. `update` bumps the desktop app.
+#
+# The CLI is Anthropic's native install in ~/.local/bin, which updates itself
+# (and via T3 Code's update button). Fresh machine:
+#   curl -fsSL https://claude.ai/install.sh | bash
 let
   version = "4.4212.0";
   hash = "sha256-T89ljg/IlTkKuCWTKHKB37ziYbDsPqkAYOgti/v9eoQ=";
@@ -19,8 +23,5 @@ let
   };
 in
 {
-  environment.systemPackages = [
-    pkgs.claude-code
-    claude-desktop
-  ];
+  environment.systemPackages = [ claude-desktop ];
 }

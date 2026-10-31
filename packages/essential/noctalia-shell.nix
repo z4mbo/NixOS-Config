@@ -84,7 +84,7 @@ let
     workspace_group_capsule = false   # no border around each workspace group
     workspace_group_content = "icons"
     icon_scale = 1.35
-    group_single_icon_per_app = true
+    group_single_icon_per_app = false # one icon per window
     prefer_symbolic_icons = false
     show_active_indicator = true
     active_indicator_color = "primary"
