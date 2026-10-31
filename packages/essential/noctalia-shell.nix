@@ -72,8 +72,7 @@ let
     position = "top"
     radius = 12
     thickness = 40
-    border = "#3a3a3a"             # same hairline as niri window borders
-    border_width = 1.0
+    border_width = 0.0             # no border around the bar
     scale = 1.15
     padding = 16
     widget_spacing = 10
@@ -99,8 +98,7 @@ let
     show_all_outputs = false
     only_active_workspace = false
     hide_empty_workspaces = true
-    show_workspace_label = true
-    workspace_label_placement = "corner"
+    show_workspace_label = false      # just the app icons, no workspace number
     workspace_group_capsule = false   # no border around each workspace group
     workspace_group_content = "icons"
     icon_scale = 1.35
